@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    depends_on:
+      db_postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    ports:
+      - '8000:8000'
+  db_postgres:
+    image: postgres:14.1-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: forumdatabase
+    volumes:
+      - postgresVolume:/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "forumdatabase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgresVolume:
